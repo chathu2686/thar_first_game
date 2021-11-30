@@ -28,7 +28,6 @@ const seed = (data) => {
        ;`);
       })
       .then(() => {
-        console.log("categories table created!");
         return db.query(
           `CREATE TABLE users (
         username VARCHAR(40) PRIMARY KEY,
@@ -39,7 +38,6 @@ const seed = (data) => {
         );
       })
       .then(() => {
-        console.log("users table created!");
         return db.query(
           `CREATE TABLE reviews (
         review_id SERIAL PRIMARY KEY,
@@ -56,7 +54,6 @@ const seed = (data) => {
         );
       })
       .then(() => {
-        console.log("categories table created!");
         return db.query(`
       CREATE TABLE comments (
         comment_id SERIAL PRIMARY KEY,
@@ -70,8 +67,6 @@ const seed = (data) => {
       })
       // inserting data into tables >>>>>>>>>>>>>>>>>>>>
       .then(() => {
-        console.log("comments table created!");
-
         const formattedCategoryData = categoryData.map((category) => {
           return [category.slug, category.description];
         });
@@ -87,8 +82,6 @@ const seed = (data) => {
         );
       })
       .then((response) => {
-        console.log("data inserted into categories table!");
-
         const formattedUserData = userData.map((user) => {
           return [user.username, user.avatar_url, user.name];
         });
@@ -104,8 +97,6 @@ const seed = (data) => {
         );
       })
       .then((response) => {
-        console.log("data inserted into users table!");
-
         const formattedReviewData = reviewData.map((review) => {
           return [
             review.title,
@@ -137,8 +128,6 @@ const seed = (data) => {
         );
       })
       .then((response) => {
-        console.log("data inserted into reviews table!");
-
         const formattedCommentData = commentData.map((comment) => {
           return [
             comment.author,
@@ -162,9 +151,6 @@ const seed = (data) => {
             formattedCommentData
           )
         );
-      })
-      .then((response) => {
-        console.log("data inserted into comments table!");
       })
   );
 };
