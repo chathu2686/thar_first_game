@@ -2,7 +2,6 @@ const { request } = require("express");
 const {
   fetchReviews,
   fetchReviewById,
-  checkReviewIdExists,
   editReviewById,
 } = require("../models/reviews-model");
 
@@ -18,9 +17,9 @@ exports.getReviews = (req, res, next) => {
 
 exports.getReviewById = (req, res, next) => {
   const reviewId = req.params.id;
-  Promise.all([fetchReviewById(reviewId), checkReviewIdExists(reviewId)])
+  fetchReviewById(reviewId)
     .then((result) => {
-      res.status(200).send({ review: result[0] });
+      res.status(200).send({ review: result });
     })
     .catch(next);
 };
@@ -28,11 +27,7 @@ exports.getReviewById = (req, res, next) => {
 exports.patchReviewById = (req, res, next) => {
   const reviewId = req.params.id;
   const newVotes = req.body.inc_votes;
-  Promise.all([
-    editReviewById(reviewId, newVotes),
-    checkReviewIdExists(reviewId),
-    notNumber(newVotes),
-  ])
+  Promise.all([editReviewById(reviewId, newVotes), notNumber(newVotes)])
     .then((result) => {
       res.status(201).send({ updatedReview: result[0] });
     })

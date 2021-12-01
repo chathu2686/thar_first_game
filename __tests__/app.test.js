@@ -27,7 +27,7 @@ describe("GET /api/categories", () => {
 });
 
 describe("GET /api/reviews/:review_id", () => {
-  test("200: returns an object with a review key with the review object", () => {
+  test("200: returns a review object", () => {
     return request(app)
       .get("/api/reviews/2")
       .expect(200)
@@ -49,7 +49,7 @@ describe("GET /api/reviews/:review_id", () => {
       });
   });
 
-  test("404: returns id does not exist error when called a valid data type id that does not exist", () => {
+  test("404: returns error message when called a valid data but non-existent review id", () => {
     return request(app)
       .get("/api/reviews/1234")
       .expect(404)
@@ -58,7 +58,7 @@ describe("GET /api/reviews/:review_id", () => {
       });
   });
 
-  test("400: returns bad request error message when called with wrong data type id", () => {
+  test("400: returns error message when called with review id of wrong data type", () => {
     return request(app)
       .get("/api/reviews/bananas")
       .expect(400)
@@ -80,7 +80,7 @@ describe("PATCH /api/reviews/:review_id", () => {
       });
   });
 
-  test("404: returns id does not exist error when called with a valid data type id that does not exist", () => {
+  test("404: returns error message when called with a valid but non-existent review id", () => {
     const reqBody = { inc_votes: 2 };
 
     return request(app)
@@ -92,7 +92,7 @@ describe("PATCH /api/reviews/:review_id", () => {
       });
   });
 
-  test("400: returns bad request error message when called with wrong data type id", () => {
+  test("400: returns bad request error message when called with a review id of wrong data type", () => {
     const reqBody = { inc_votes: 2 };
 
     return request(app)
@@ -134,7 +134,7 @@ describe("PATCH /api/reviews/:review_id", () => {
 });
 
 describe("GET /api/reviews", () => {
-  test("200: returns an object with a reviews key than has an array of review objects", () => {
+  test("200: returns an array of review objects", () => {
     return request(app)
       .get("/api/reviews")
       .expect(200)
@@ -158,12 +158,13 @@ describe("GET /api/reviews", () => {
   });
 });
 
-describe("GET /api/reviews/:review_id/comments", () => {
-  test.only("200: returns an array of comments for the given review_id", () => {
+describe.only("GET /api/reviews/:review_id/comments", () => {
+  test("200: returns an array of comments for the given review_id", () => {
     return request(app)
-      .get("/api/reviews/:review_id/comments")
+      .get("/api/reviews/3/comments")
       .expect(200)
       .then((res) => {
+        expect(res.body.comments).toHaveLength(3);
         res.body.comments.forEach((comment) => {
           expect(comment).toEqual(
             expect.objectContaining({
@@ -175,6 +176,15 @@ describe("GET /api/reviews/:review_id/comments", () => {
             })
           );
         });
+      });
+  });
+
+  test("200: returns empty array when there are no comments for the given review id", () => {
+    return request(app)
+      .get("/api/reviews/1/comments")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.comments).toEqual([]);
       });
   });
 });

@@ -1,23 +1,11 @@
 const db = require("../db/connection");
 const format = require("pg-format");
 
-exports.checkReviewIdExists = (review_id) => {
-  return db
-    .query(
-      `
-    SELECT * FROM reviews
-    WHERE review_id = $1
-  ;`,
-      [review_id]
-    )
-    .then((result) => {
-      if (result.rowCount === 0) {
-        return Promise.reject({
-          status: 404,
-          msg: "Oh Dear, review_id does not exist!",
-        });
-      }
-    });
+const reviewIdNotExist = () => {
+  return Promise.reject({
+    status: 404,
+    msg: "Oh Dear, review_id does not exist!",
+  });
 };
 
 exports.fetchReviews = () => {
@@ -46,7 +34,11 @@ exports.fetchReviewById = (review_id) => {
       [review_id]
     )
     .then((result) => {
-      return result.rows[0];
+      if (!result.rows.length) {
+        return reviewIdNotExist();
+      } else {
+        return result.rows[0];
+      }
     });
 };
 
@@ -62,6 +54,10 @@ exports.editReviewById = (review_id, newVotes) => {
       [newVotes, review_id]
     )
     .then((result) => {
-      return result.rows[0];
+      if (!result.rows.length) {
+        return reviewIdNotExist();
+      } else {
+        return result.rows[0];
+      }
     });
 };
