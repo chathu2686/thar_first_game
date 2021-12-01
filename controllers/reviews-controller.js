@@ -1,5 +1,6 @@
 const { request } = require("express");
 const {
+  isReviewQueryValid,
   fetchReviews,
   fetchReviewById,
   editReviewById,
@@ -8,18 +9,20 @@ const {
 const { notNumber } = require("../utils/utils");
 
 exports.getReviews = (req, res, next) => {
-  const reqSortBy = req.query.sort_by;
-  const reqOrder = req.query.order;
-  const reqCategory = req.query.category;
+  const reqSortBy = req.query.sort_by || "created_at";
+  const reqOrder = req.query.order || "DESC";
+  const reqCategory = req.query.category || "%";
 
-  fetchReviews(reqSortBy, reqOrder, reqCategory)
-    .then((reviews) => {
-      res.status(200).send({ reviews });
+  Promise.all([
+    fetchReviews(reqSortBy, reqOrder, reqCategory),
+    isReviewQueryValid("category", reqCategory),
+    isReviewQueryValid("order", reqOrder),
+    isReviewQueryValid("sort_by", reqSortBy),
+  ])
+    .then((result) => {
+      res.status(200).send({ reviews: result[0] });
     })
-    .catch((err) => {
-      console.log(err);
-      next(err);
-    });
+    .catch(next);
 };
 
 exports.getReviewById = (req, res, next) => {

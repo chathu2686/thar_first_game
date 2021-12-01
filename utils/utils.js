@@ -19,5 +19,4 @@ exports.notNumber = (data) => {
       msg: "Oh Dear, inc_votes needs to be a positive whole number!",
     });
   }
-  return "is a number";
 };

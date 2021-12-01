@@ -2,6 +2,7 @@ const db = require("../db/connection");
 const format = require("pg-format");
 
 exports.checkReviewIdExists = (id) => {
+  console.log(id);
   return db
     .query(
       `
@@ -20,16 +21,13 @@ exports.checkReviewIdExists = (id) => {
     });
 };
 
-exports.checkQueryValue = (valueArr, value) => {};
-
-exports.fetchReviews = (sortBy = "created_at", order = "DESC", category) => {
-  console.log(category);
-
+exports.isReviewQueryValid = (queryType, value) => {
   const categoryArr = [
     "euro game",
     "social deduction",
     "dexterity",
     "children's games",
+    "%",
   ];
   const orderArr = ["ASC", "DESC"];
 
@@ -42,44 +40,41 @@ exports.fetchReviews = (sortBy = "created_at", order = "DESC", category) => {
     "comment_count",
   ];
 
-  let queryStr = `
-   SELECT reviews.*, (SELECT COUNT(*) FROM comments WHERE comments.review_id=reviews.review_id) AS comment_count FROM reviews
-  `;
-
-  if (category && categoryArr.includes(category)) {
-    console.log(queryStr);
-    queryStr += ` WHERE category LIKE '${category}'`;
-    console.log(queryStr);
-  } else if (category !== undefined) {
+  if (queryType === "category" && !categoryArr.includes(value)) {
     return Promise.reject({
       status: 404,
       msg: "Oh Dear, Invalid category!",
     });
   }
-  if (!sortByColumnsArr.includes(sortBy)) {
-    return Promise.reject({
-      status: 404,
-      msg: "Oh Dear, Invalid sort_by value!",
-    });
-  } else {
-    queryStr += `ORDER BY ${sortBy}`;
-  }
-  if (!orderArr.includes(order.toUpperCase())) {
+
+  if (queryType === "order" && !orderArr.includes(value.toUpperCase())) {
     return Promise.reject({
       status: 404,
       msg: "Oh Dear, Invalid order value!",
     });
-  } else {
-    if (order.toUpperCase() === "ASC") {
-      queryStr += ` ASC`;
-    } else {
-      queryStr += ` DESC`;
-    }
   }
 
-  return db.query(queryStr).then((result) => {
-    console.log(result.rows);
-    return result.rows;
+  if (queryType === "sort_by" && !sortByColumnsArr.includes(value)) {
+    return Promise.reject({
+      status: 404,
+      msg: "Oh Dear, Invalid sort_by value!",
+    });
+  }
+};
+
+exports.fetchReviews = (sortBy = "created_at", order = "DESC", category) => {
+  let queryStr = `
+   SELECT reviews.*, (SELECT COUNT(*)::INT FROM comments WHERE comments.review_id=reviews.review_id) AS comment_count FROM reviews
+  `;
+
+  if (category !== "%") {
+    queryStr += ` WHERE category LIKE '${category}'`;
+  }
+
+  queryStr += `ORDER BY ${sortBy} ${order.toUpperCase()}`;
+
+  return db.query(queryStr).then(({ rows }) => {
+    return rows;
   });
 };
 

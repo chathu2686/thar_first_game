@@ -20,3 +20,20 @@ exports.fetchCommentsByReviewId = (id) => {
       return result.rows;
     });
 };
+
+exports.addCommentsByReviewId = (comment, reviewId) => {
+  return db
+    .query(
+      `
+    INSERT INTO comments
+    (author, review_id, votes, body)
+    VALUES
+    ($1, $2, 0, $3)
+    RETURNING *
+  ;`,
+      [comment.username, reviewId, comment.body]
+    )
+    .then(({ rows }) => {
+      return rows[0];
+    });
+};

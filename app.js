@@ -2,8 +2,9 @@ const { response } = require("express");
 const express = require("express");
 const {
   handle500Error,
-  handle404Error,
+  handleCustomError,
   handle400Error,
+  handle404Error,
 } = require("./errors/errors");
 const apiRouter = require("./routes/apiRouter");
 
@@ -14,6 +15,7 @@ app.use("/api", apiRouter);
 
 app.use(handle400Error);
 app.use(handle404Error);
+app.use(handleCustomError);
 app.use(handle500Error);
 
 module.exports = app;

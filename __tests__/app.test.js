@@ -26,6 +26,177 @@ describe("GET /api/categories", () => {
   });
 });
 
+describe("GET /api/reviews", () => {
+  test("200: returns an array of review objects ordered by date(created_at) Descending by default", () => {
+    return request(app)
+      .get("/api/reviews")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("created_at", {
+          descending: true,
+        });
+
+        expect(res.body.reviews).toHaveLength(13);
+
+        res.body.reviews.forEach((review) => {
+          expect(review).toEqual(
+            expect.objectContaining({
+              owner: expect.any(String),
+              title: expect.any(String),
+              review_id: expect.any(Number),
+              category: expect.any(String),
+              review_img_url: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              comment_count: expect.any(Number),
+            })
+          );
+        });
+      });
+  });
+
+  test("200: returns an array of review objects with the valid category, descending by default, when called with a category query", () => {
+    return request(app)
+      .get("/api/reviews?category=social deduction")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("created_at", {
+          descending: true,
+        });
+
+        expect(res.body.reviews).toHaveLength(11);
+
+        res.body.reviews.forEach((review) => {
+          expect(review).toEqual(
+            expect.objectContaining({
+              owner: expect.any(String),
+              title: expect.any(String),
+              review_id: expect.any(Number),
+              category: "social deduction",
+              review_img_url: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              comment_count: expect.any(Number),
+            })
+          );
+        });
+      });
+  });
+
+  test("404: returns error message when called with an invalid category query", () => {
+    return request(app)
+      .get("/api/reviews?category=bananas")
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, Invalid category!");
+      });
+  });
+
+  test("200: returns an array of review objects ordered by the queried sort_by column, descending by default, when called with a valid sort_by column", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=votes")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("votes", {
+          descending: true,
+        });
+
+        expect(res.body.reviews).toHaveLength(13);
+
+        res.body.reviews.forEach((review) => {
+          expect(review).toEqual(
+            expect.objectContaining({
+              owner: expect.any(String),
+              title: expect.any(String),
+              review_id: expect.any(Number),
+              category: expect.any(String),
+              review_img_url: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              comment_count: expect.any(Number),
+            })
+          );
+        });
+      });
+  });
+
+  test("404: returns error message when called with invalid sort_by column query", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=hello")
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, Invalid sort_by value!");
+      });
+  });
+
+  test("200: returns an array of review objects ordered by date(created_at) in ascending order when called with an order query(regardless of case)", () => {
+    return request(app)
+      .get("/api/reviews?order=AsC")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("created_at", {
+          descending: false,
+        });
+
+        expect(res.body.reviews).toHaveLength(13);
+
+        res.body.reviews.forEach((review) => {
+          expect(review).toEqual(
+            expect.objectContaining({
+              owner: expect.any(String),
+              title: expect.any(String),
+              review_id: expect.any(Number),
+              category: expect.any(String),
+              review_img_url: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              comment_count: expect.any(Number),
+            })
+          );
+        });
+      });
+  });
+
+  test("404: returns error message when called with an invalid order query", () => {
+    return request(app)
+      .get("/api/reviews?order=banana")
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, Invalid order value!");
+      });
+  });
+
+  test("200: returns an array of review objects of the queried category ordered by queried column and in the queried order ", () => {
+    return request(app)
+      .get(
+        "/api/reviews?sort_by=votes&&order=dEsC&&category=social%20deduction"
+      )
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("votes", {
+          descending: true,
+        });
+
+        expect(res.body.reviews).toHaveLength(11);
+
+        res.body.reviews.forEach((review) => {
+          expect(review).toEqual(
+            expect.objectContaining({
+              owner: expect.any(String),
+              title: expect.any(String),
+              review_id: expect.any(Number),
+              category: expect.any(String),
+              review_img_url: expect.any(String),
+              created_at: expect.any(String),
+              votes: expect.any(Number),
+              comment_count: expect.any(Number),
+            })
+          );
+        });
+      });
+  });
+});
+
 describe("GET /api/reviews/:review_id", () => {
   test("200: returns a review object", () => {
     return request(app)
@@ -133,44 +304,6 @@ describe("PATCH /api/reviews/:review_id", () => {
   });
 });
 
-describe("GET /api/reviews", () => {
-  test("200: returns an array of review objects ordered by date(created_at) Descending by default", () => {
-    return request(app)
-      .get("/api/reviews")
-      .expect(200)
-      .then((res) => {
-        expect(res.body.reviews).toBeSortedBy("created_at", {
-          descending: true,
-        });
-
-        expect(res.body.reviews).toHaveLength(13);
-        res.body.reviews.forEach((review) => {
-          expect(review).toEqual(
-            expect.objectContaining({
-              owner: expect.any(String),
-              title: expect.any(String),
-              review_id: expect.any(Number),
-              category: expect.any(String),
-              review_img_url: expect.any(String),
-              created_at: expect.any(String),
-              votes: expect.any(Number),
-              comment_count: expect.any(Number),
-            })
-          );
-        });
-      });
-  });
-
-  test.only("200: returns an array of review objects ordered by date(created_at) Descending by default", () => {
-    return request(app)
-      .get(
-        "/api/reviews?sort_by=review_id&&order=ASC&&category=social deduction"
-      )
-      .expect(200)
-      .then((res) => console.log(res.body.reviews));
-  });
-});
-
 describe("GET /api/reviews/:review_id/comments", () => {
   test("200: returns an array of comments for the given review_id", () => {
     return request(app)
@@ -220,13 +353,58 @@ describe("GET /api/reviews/:review_id/comments", () => {
   });
 });
 
-// describe.only("POST /api/reviews/:review_id/comments", () => {
-//   test("201: response with new comment object", () => {
-//     const reqBody = {
-//       username: "bainesface",
-//       body: "well done! nice comment :D",
-//     };
+describe.only("POST /api/reviews/:review_id/comments", () => {
+  test("201: response with new comment object", () => {
+    const reqBody = {
+      username: "bainesface",
+      body: "well done! nice comment :D",
+    };
 
-//     return request(app).post("/api/reviews/4/comments").send(request);
-//   });
-// });
+    return request(app)
+      .post("/api/reviews/4/comments")
+      .send(reqBody)
+      .expect(201)
+      .then((res) => {
+        expect(res.body.comment).toEqual(
+          expect.objectContaining({
+            author: "bainesface",
+            body: "well done! nice comment :D",
+            review_id: 4,
+            votes: 0,
+            comment_id: 7,
+            created_at: expect.any(String),
+          })
+        );
+      });
+  });
+
+  test("404: returns error message if review id is valid but non-existent", () => {
+    const reqBody = {
+      username: "bainesface",
+      body: "well done! nice comment :D",
+    };
+
+    return request(app)
+      .post("/api/reviews/124/comments")
+      .send(reqBody)
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, id does not exist!");
+      });
+  });
+
+  test("400: returns error message if review id is incorrect data type", () => {
+    const reqBody = {
+      username: "bainesface",
+      body: "well done! nice comment :D",
+    };
+
+    return request(app)
+      .post("/api/reviews/bananas/comments")
+      .send(reqBody)
+      .expect(400)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, bad request!");
+      });
+  });
+});
