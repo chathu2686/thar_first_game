@@ -2,7 +2,6 @@ const db = require("../db/connection");
 const format = require("pg-format");
 
 exports.fetchCommentsByReviewId = (id) => {
-  console.log(id);
   return db
     .query(
       `
@@ -18,7 +17,6 @@ exports.fetchCommentsByReviewId = (id) => {
       [id]
     )
     .then((result) => {
-      console.log(result.rows);
       return result.rows;
     });
 };

@@ -134,11 +134,15 @@ describe("PATCH /api/reviews/:review_id", () => {
 });
 
 describe("GET /api/reviews", () => {
-  test("200: returns an array of review objects", () => {
+  test("200: returns an array of review objects ordered by date(created_at) Descending by default", () => {
     return request(app)
       .get("/api/reviews")
       .expect(200)
       .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("created_at", {
+          descending: true,
+        });
+
         expect(res.body.reviews).toHaveLength(13);
         res.body.reviews.forEach((review) => {
           expect(review).toEqual(
@@ -156,9 +160,18 @@ describe("GET /api/reviews", () => {
         });
       });
   });
+
+  test.only("200: returns an array of review objects ordered by date(created_at) Descending by default", () => {
+    return request(app)
+      .get(
+        "/api/reviews?sort_by=review_id&&order=ASC&&category=social deduction"
+      )
+      .expect(200)
+      .then((res) => console.log(res.body.reviews));
+  });
 });
 
-describe.only("GET /api/reviews/:review_id/comments", () => {
+describe("GET /api/reviews/:review_id/comments", () => {
   test("200: returns an array of comments for the given review_id", () => {
     return request(app)
       .get("/api/reviews/3/comments")
@@ -187,4 +200,33 @@ describe.only("GET /api/reviews/:review_id/comments", () => {
         expect(res.body.comments).toEqual([]);
       });
   });
+
+  test("400: returns bad request error message when called with a review id of the wrong data type", () => {
+    return request(app)
+      .get("/api/reviews/banana/comments")
+      .expect(400)
+      .then((result) => {
+        expect(result.body.msg).toBe("Oh Dear, bad request!");
+      });
+  });
+
+  test("404: returns error message when called with a valid but non-existent review_id", () => {
+    return request(app)
+      .get("/api/reviews/1234/comments")
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, review_id does not exist!");
+      });
+  });
 });
+
+// describe.only("POST /api/reviews/:review_id/comments", () => {
+//   test("201: response with new comment object", () => {
+//     const reqBody = {
+//       username: "bainesface",
+//       body: "well done! nice comment :D",
+//     };
+
+//     return request(app).post("/api/reviews/4/comments").send(request);
+//   });
+// });
