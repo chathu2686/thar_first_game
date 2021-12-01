@@ -11,3 +11,13 @@ exports.dataFormatter = (data, ...keys) => {
   }
   return result;
 };
+
+exports.notNumber = (data) => {
+  if (isNaN(data) || data % 1 !== 0) {
+    return Promise.reject({
+      status: 422,
+      msg: "Oh Dear, inc_votes needs to be a positive whole number!",
+    });
+  }
+  return "is a number";
+};

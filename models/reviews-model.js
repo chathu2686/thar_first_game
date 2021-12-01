@@ -20,6 +20,20 @@ exports.checkReviewIdExists = (review_id) => {
     });
 };
 
+exports.fetchReviews = () => {
+  return db
+    .query(
+      `
+   SELECT reviews.*, COUNT(comments.*)::INT AS comment_count  FROM comments
+   RIGHT JOIN reviews on comments.review_id = reviews.review_id 
+   GROUP BY reviews.review_id
+  ;`
+    )
+    .then((result) => {
+      return result.rows;
+    });
+};
+
 exports.fetchReviewById = (review_id) => {
   return db
     .query(
@@ -30,6 +44,22 @@ exports.fetchReviewById = (review_id) => {
     GROUP BY reviews.review_id
   ;`,
       [review_id]
+    )
+    .then((result) => {
+      return result.rows[0];
+    });
+};
+
+exports.editReviewById = (review_id, newVotes) => {
+  return db
+    .query(
+      `
+  UPDATE reviews
+  SET votes = votes + $1
+  WHERE review_id = $2
+  RETURNING *
+    ;`,
+      [newVotes, review_id]
     )
     .then((result) => {
       return result.rows[0];

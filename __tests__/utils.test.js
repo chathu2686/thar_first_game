@@ -1,4 +1,4 @@
-const { dataFormatter } = require("../utils/utils");
+const { dataFormatter, notNumber } = require("../utils/utils");
 
 describe("dataFormatter", () => {
   test("takes return an empty array when called with empty array and no key arguments", () => {
