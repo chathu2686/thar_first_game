@@ -33,11 +33,24 @@
       ]
     }
   },
+  "GET /api/users": {
+    "description": "serves an array of all users",
+    "queries": [],
+    "exampleResponse": {
+      "users": [
+        {
+          "name": "Akihisa Okui",
+          "username": "happyamy2016",
+          "avatar_url": "https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+        }
+      ]
+    }
+  },
   "GET /api/reviews/:review_id": {
     "description": "serves an object of the queried review",
     "queries": [""],
     "exampleResponse": {
-      "reviews": {
+      "review": {
         "title": "One Night Ultimate Werewolf",
         "review_id": 1,
         "designer": "Akihisa Okui",
@@ -51,11 +64,22 @@
       }
     }
   },
+  "GET /api/users/:username": {
+    "description": "serves a user object for the queried username",
+    "queries": [""],
+    "exampleResponse": {
+      "users": {
+        "name": "Akihisa Okui",
+        "username": "happyamy2016",
+        "avatar_url": "https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260"
+      }
+    }
+  },
   "Patch /api/reviews/:review_id": {
     "description": "serves an object of the queried and updated review",
     "queries": [],
     "exampleResponse": {
-      "reviews": {
+      "review": {
         "title": "One Night Ultimate Werewolf",
         "review_id": 1,
         "designer": "Akihisa Okui",
@@ -73,7 +97,7 @@
     "description": "serves an array of comments objects of the queried review",
     "queries": [],
     "exampleResponse": {
-      "reviews": [
+      "comments": [
         {
           "comment_id": 3,
           "author": "happyamy2016",
@@ -89,7 +113,7 @@
     "description": "serves posted comment object for the queried review",
     "queries": [],
     "exampleResponse": {
-      "reviews": [
+      "comment": [
         {
           "comment_id": 3,
           "author": "happyamy2016",

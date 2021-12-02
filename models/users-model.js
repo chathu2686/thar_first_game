@@ -18,3 +18,36 @@ exports.checkUsernameExists = (username) => {
       }
     });
 };
+
+exports.fetchUsers = () => {
+  return db
+    .query(
+      `
+  SELECT * FROM userData
+  ;`
+    )
+    .then(({ rows }) => {
+      return rows;
+    });
+};
+
+exports.fetchUserById = (userName) => {
+  return db
+    .query(
+      `
+  SELECT * FROM userData
+  WHERE username LIKE $1
+  ;`,
+      [userName]
+    )
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({
+          status: 404,
+          msg: "Oh Dear, user does not exist!",
+        });
+      } else {
+        return rows[0];
+      }
+    });
+};

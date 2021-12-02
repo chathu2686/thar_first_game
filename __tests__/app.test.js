@@ -37,6 +37,27 @@ describe("GET /api/categories", () => {
   });
 });
 
+describe("GET /api/users", () => {
+  test("200: returns an array of user objects", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.users).toHaveLength(4);
+
+        res.body.users.forEach((user) => {
+          expect(user).toEqual(
+            expect.objectContaining({
+              username: expect.any(String),
+              avatar_url: expect.any(String),
+              name: expect.any(String),
+            })
+          );
+        });
+      });
+  });
+});
+
 describe("GET /api/reviews", () => {
   test("200: returns an array of review objects ordered by date(created_at) Descending by default", () => {
     return request(app)
@@ -204,6 +225,32 @@ describe("GET /api/reviews", () => {
             })
           );
         });
+      });
+  });
+});
+
+describe("GET /api/users/:username", () => {
+  test("200: returns the valid users object", () => {
+    return request(app)
+      .get("/api/users/dav3rid")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.user).toEqual(
+          expect.objectContaining({
+            username: expect.any(String),
+            avatar_url: expect.any(String),
+            name: expect.any(String),
+          })
+        );
+      });
+  });
+
+  test("404: returns error message for invalid username", () => {
+    return request(app)
+      .get("/api/users/notausername")
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toEqual("Oh Dear, user does not exist!");
       });
   });
 });
