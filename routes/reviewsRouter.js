@@ -9,7 +9,6 @@ const {
   postCommentsByReviewId,
 } = require("../controllers/comments-controller");
 
-const reviews = require("../db/data/test-data/reviews");
 const reviewsRouter = require("express").Router();
 
 reviewsRouter.route("/").get(getReviews);

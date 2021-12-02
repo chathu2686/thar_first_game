@@ -2,7 +2,6 @@ const db = require("../db/connection");
 const format = require("pg-format");
 
 exports.checkReviewIdExists = (id) => {
-  console.log(id);
   return db
     .query(
       `

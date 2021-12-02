@@ -353,7 +353,7 @@ describe("GET /api/reviews/:review_id/comments", () => {
   });
 });
 
-describe.only("POST /api/reviews/:review_id/comments", () => {
+describe("POST /api/reviews/:review_id/comments", () => {
   test("201: response with new comment object", () => {
     const reqBody = {
       username: "bainesface",
@@ -389,7 +389,9 @@ describe.only("POST /api/reviews/:review_id/comments", () => {
       .send(reqBody)
       .expect(404)
       .then((res) => {
-        expect(res.body.msg).toBe("Oh Dear, id does not exist!");
+        expect(res.body.msg).toBe(
+          'Oh Dear, id does not exist! Key (review_id)=(124) is not present in table "reviews".'
+        );
       });
   });
 
@@ -402,6 +404,45 @@ describe.only("POST /api/reviews/:review_id/comments", () => {
     return request(app)
       .post("/api/reviews/bananas/comments")
       .send(reqBody)
+      .expect(400)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, bad request!");
+      });
+  });
+
+  test("400: returns error message if request body has non-existent username", () => {
+    const reqBody = {
+      username: "helloo",
+      body: "well done! nice comment :D",
+    };
+
+    return request(app)
+      .post("/api/reviews/1/comments")
+      .send(reqBody)
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, username does not exist!");
+      });
+  });
+});
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("204: deletes comment and returns 204 status code ", () => {
+    return request(app).delete("/api/comments/2").expect(204);
+  });
+
+  test("404: returns error message when called with valid but non-existent comment id", () => {
+    return request(app)
+      .delete("/api/comments/123")
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, comment id does not exist!");
+      });
+  });
+
+  test("400: returns error message when called with comment id of incorrect data type", () => {
+    return request(app)
+      .delete("/api/comments/bananas")
       .expect(400)
       .then((res) => {
         expect(res.body.msg).toBe("Oh Dear, bad request!");
