@@ -7,6 +7,15 @@ const request = require("supertest");
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
 
+describe.only("GET /api", () => {
+  test("serves up a json representation of all the available endpoints of the api", () => {
+    return request(app)
+      .get("/api")
+      .expect(200)
+      .then((res) => {});
+  });
+});
+
 describe("GET /api/categories", () => {
   test("200: returns an array of category objects", () => {
     return request(app)
