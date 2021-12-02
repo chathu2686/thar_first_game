@@ -6,6 +6,10 @@ const {
   handle404Error,
 } = require("./errors/errors");
 const apiRouter = require("./routes/apiRouter");
+const categoriesRouter = require("./routes/categoriesRouter");
+const reviewsRouter = require("./routes/reviewsRouter");
+const commentsRouter = require("./routes/commentsRouter");
+const usersRouter = require("./routes/usersRouter");
 
 const app = express();
 app.use(express.json());
@@ -15,6 +19,10 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api", apiRouter);
+app.use("/categories", categoriesRouter);
+app.use("/reviews", reviewsRouter);
+app.use("/comments", commentsRouter);
+app.use("/users", usersRouter);
 
 app.use(handle400Error);
 app.use(handle404Error);
