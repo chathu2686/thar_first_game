@@ -1,3 +1,4 @@
+const { getReviews } = require("./controllers/reviews-controller");
 const { response } = require("express");
 const express = require("express");
 const {
@@ -14,7 +15,8 @@ app.use(express.json());
 app.get("/", (req, res) => {
   res.status(200).send("Welcome to Tharaka's game-data API!");
 });
-app.use("/api", apiRouter);
+app.get("/reviews", getReviews);
+// app.use("/api", apiRouter);
 
 app.use(handle400Error);
 app.use(handle404Error);
