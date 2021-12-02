@@ -4,7 +4,7 @@ exports.checkUsernameExists = (username) => {
   return db
     .query(
       `
-    SELECT * from users
+    SELECT * from userData
     WHERE username LIKE $1
     ;`,
       [username]

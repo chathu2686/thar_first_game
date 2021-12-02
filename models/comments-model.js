@@ -6,13 +6,13 @@ exports.fetchCommentsByReviewId = (id) => {
     .query(
       `
         SELECT 
-        comments.comment_id, 
-        comments.votes, 
-        comments.created_at, 
-        comments.author, 
-        comments.body 
-        FROM comments
-        WHERE comments.review_id = $1    
+        commentData.comment_id, 
+        commentData.votes, 
+        commentData.created_at, 
+        commentData.author, 
+        commentData.body 
+        FROM commentData
+        WHERE commentData.review_id = $1    
     ;`,
       [id]
     )
@@ -25,7 +25,7 @@ exports.addCommentsByReviewId = (comment, reviewId) => {
   return db
     .query(
       `
-    INSERT INTO comments
+    INSERT INTO commentData
     (author, review_id, votes, body)
     VALUES
     ($1, $2, 0, $3)
@@ -42,7 +42,7 @@ exports.removeCommentById = (id) => {
   return db
     .query(
       `
-    DELETE FROM comments
+    DELETE FROM commentData
     WHERE comment_id = $1
     returning *
   ;`,

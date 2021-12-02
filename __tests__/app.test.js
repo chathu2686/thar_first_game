@@ -7,13 +7,13 @@ const request = require("supertest");
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
 
-describe.only("GET /api", () => {
+describe("GET /api", () => {
   test("serves up a json representation of all the available endpoints of the api", () => {
     return request(app)
       .get("/api")
       .expect(200)
       .then((res) => {
-        console.log(res.body);
+        expect(typeof res.body).toBe("object");
       });
   });
 });
@@ -401,7 +401,7 @@ describe("POST /api/reviews/:review_id/comments", () => {
       .expect(404)
       .then((res) => {
         expect(res.body.msg).toBe(
-          'Oh Dear, id does not exist! Key (review_id)=(124) is not present in table "reviews".'
+          'Oh Dear, id does not exist! Key (review_id)=(124) is not present in table "reviewdata".'
         );
       });
   });

@@ -5,7 +5,7 @@ exports.checkReviewIdExists = (id) => {
   return db
     .query(
       `
-        SELECT * FROM reviews
+        SELECT * FROM reviewData
         WHERE review_id = $1
     ;`,
       [id]
@@ -63,7 +63,7 @@ exports.isReviewQueryValid = (queryType, value) => {
 
 exports.fetchReviews = (sortBy = "created_at", order = "DESC", category) => {
   let queryStr = `
-   SELECT reviews.*, (SELECT COUNT(*)::INT FROM comments WHERE comments.review_id=reviews.review_id) AS comment_count FROM reviews
+   SELECT reviewData.*, (SELECT COUNT(*)::INT FROM commentData WHERE commentData.review_id=reviewData.review_id) AS comment_count FROM reviewData
   `;
 
   if (category !== "%") {
@@ -81,10 +81,10 @@ exports.fetchReviewById = (review_id) => {
   return db
     .query(
       `
-    SELECT reviews.*, COUNT(comments.*)::INT AS comment_count  FROM comments 
-    JOIN reviews on comments.review_id = reviews.review_id
-    WHERE reviews.review_id = $1
-    GROUP BY reviews.review_id
+    SELECT reviewData.*, COUNT(commentData.*)::INT AS comment_count  FROM commentData 
+    JOIN reviewData on commentData.review_id = reviewData.review_id
+    WHERE reviewData.review_id = $1
+    GROUP BY reviewData.review_id
   ;`,
       [review_id]
     )
@@ -104,7 +104,7 @@ exports.editReviewById = (review_id, newVotes) => {
   return db
     .query(
       `
-  UPDATE reviews
+  UPDATE reviewData
   SET votes = votes + $1
   WHERE review_id = $2
   RETURNING *

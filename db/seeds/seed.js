@@ -1,6 +1,5 @@
 const db = require("../connection");
 const format = require("pg-format");
-const { values } = require("../data/development-data/comments");
 
 const seed = (data) => {
   const { categoryData, commentData, reviewData, userData } = data;
@@ -8,20 +7,20 @@ const seed = (data) => {
   return (
     db
       // dropping tables >>>>>>>>>>>
-      .query(`DROP TABLE IF EXISTS comments;`)
+      .query(`DROP TABLE IF EXISTS commentData;`)
       .then(() => {
-        return db.query(`DROP TABLE IF EXISTS reviews;`);
+        return db.query(`DROP TABLE IF EXISTS reviewData;`);
       })
       .then(() => {
-        return db.query(`DROP TABLE IF EXISTS users;`);
+        return db.query(`DROP TABLE IF EXISTS userData;`);
       })
       .then(() => {
-        return db.query(`DROP TABLE IF EXISTS categories;`);
+        return db.query(`DROP TABLE IF EXISTS categoryData;`);
       })
       // creating tables >>>>>>>>>>>>>
       .then(() => {
         return db.query(`
-     CREATE TABLE categories (
+     CREATE TABLE categoryData (
        slug VARCHAR(40) PRIMARY KEY,
        description TEXT NOT NULL
        )
@@ -29,7 +28,7 @@ const seed = (data) => {
       })
       .then(() => {
         return db.query(
-          `CREATE TABLE users (
+          `CREATE TABLE userData (
         username VARCHAR(40) PRIMARY KEY,
         avatar_url VARCHAR(300),
         name TEXT NOT NULL
@@ -39,15 +38,15 @@ const seed = (data) => {
       })
       .then(() => {
         return db.query(
-          `CREATE TABLE reviews (
+          `CREATE TABLE reviewData (
         review_id SERIAL PRIMARY KEY,
         title VARCHAR(255) NOT NULL,
         review_body TEXT NOT NULL,
         designer VARCHAR(255) NOT NULL,
         review_img_url TEXT DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg' NOT NULL,
         votes INT DEFAULT 0 NOT NULL,
-        category VARCHAR(40) REFERENCES categories(slug) ON DELETE CASCADE NOT NULL,
-        owner VARCHAR(40) REFERENCES users(username) ON DELETE CASCADE NOT NULL,
+        category VARCHAR(40) REFERENCES categoryData(slug) ON DELETE CASCADE NOT NULL,
+        owner VARCHAR(40) REFERENCES userData(username) ON DELETE CASCADE NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
       )
       ;`
@@ -55,10 +54,10 @@ const seed = (data) => {
       })
       .then(() => {
         return db.query(`
-      CREATE TABLE comments (
+      CREATE TABLE commentData (
         comment_id SERIAL PRIMARY KEY,
         author VARCHAR(40) NOT NULL,
-        review_id INT REFERENCES reviews(review_id) ON DELETE CASCADE NOT NULL,
+        review_id INT REFERENCES reviewData(review_id) ON DELETE CASCADE NOT NULL,
         votes INT default 0 NOT NULL,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
         body TEXT NOT NULL
@@ -73,7 +72,7 @@ const seed = (data) => {
 
         return db.query(
           format(
-            `INSERT INTO categories
+            `INSERT INTO categoryData
       (slug, description)
       VALUES
       %L RETURNING *;`,
@@ -88,7 +87,7 @@ const seed = (data) => {
 
         return db.query(
           format(
-            `INSERT INTO users
+            `INSERT INTO userData
       (username, avatar_url, name)
       VALUES
       %L RETURNING *;`,
@@ -112,7 +111,7 @@ const seed = (data) => {
 
         return db.query(
           format(
-            `INSERT INTO reviews
+            `INSERT INTO reviewData
       ( title,
         review_body,
         designer,
@@ -140,7 +139,7 @@ const seed = (data) => {
 
         return db.query(
           format(
-            `INSERT INTO comments
+            `INSERT INTO commentData
       ( author,
         review_id,
         votes,
