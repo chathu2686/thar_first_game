@@ -57,3 +57,26 @@ exports.removeCommentById = (id) => {
       }
     });
 };
+
+exports.editCommentById = (id, newVotes) => {
+  return db
+    .query(
+      `
+  UPDATE commentData
+  SET votes = votes + $1
+  WHERE comment_id = $2
+  RETURNING *
+  ;`,
+      [newVotes, id]
+    )
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({
+          status: 404,
+          msg: "Oh Dear, comment id does not exist!",
+        });
+      } else {
+        return rows[0];
+      }
+    });
+};

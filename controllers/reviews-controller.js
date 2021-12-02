@@ -4,6 +4,7 @@ const {
   fetchReviews,
   fetchReviewById,
   editReviewById,
+  removeReviewById,
 } = require("../models/reviews-model");
 
 const { notNumber } = require("../utils/utils");
@@ -26,7 +27,7 @@ exports.getReviews = (req, res, next) => {
 };
 
 exports.getReviewById = (req, res, next) => {
-  const reviewId = req.params.id;
+  const reviewId = req.params.review_id;
   fetchReviewById(reviewId)
     .then((result) => {
       res.status(200).send({ review: result });
@@ -35,11 +36,20 @@ exports.getReviewById = (req, res, next) => {
 };
 
 exports.patchReviewById = (req, res, next) => {
-  const reviewId = req.params.id;
+  const reviewId = req.params.review_id;
   const newVotes = req.body.inc_votes;
   Promise.all([editReviewById(reviewId, newVotes), notNumber(newVotes)])
     .then((result) => {
       res.status(201).send({ updatedReview: result[0] });
+    })
+    .catch(next);
+};
+
+exports.deleteReviewById = (req, res, next) => {
+  const reviewId = req.params.review_id;
+  removeReviewById(reviewId)
+    .then((result) => {
+      res.status(204).send();
     })
     .catch(next);
 };

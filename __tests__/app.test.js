@@ -37,6 +37,26 @@ describe("GET /api/categories", () => {
   });
 });
 
+describe("POST /api/categories", () => {
+  test("201: returns category object containing newlyu added category", () => {
+    const reqBody = {
+      slug: "puzzles",
+      description: "jigsaws etc",
+    };
+
+    return request(app)
+      .post("/api/categories")
+      .send(reqBody)
+      .expect(201)
+      .then((res) => {
+        expect(res.body.newCategory).toEqual({
+          slug: "puzzles",
+          description: "jigsaws etc",
+        });
+      });
+  });
+});
+
 describe("GET /api/users", () => {
   test("200: returns an array of user objects", () => {
     return request(app)
@@ -298,7 +318,7 @@ describe("GET /api/reviews/:review_id", () => {
 });
 
 describe("PATCH /api/reviews/:review_id", () => {
-  test("201: returns returns updated review object", () => {
+  test("201: returns returns updated review object when new votes is a positive number", () => {
     const reqBody = { inc_votes: 2 };
     return request(app)
       .patch("/api/reviews/2")
@@ -306,6 +326,17 @@ describe("PATCH /api/reviews/:review_id", () => {
       .expect(201)
       .then((res) => {
         expect(res.body.updatedReview.votes).toBe(7);
+      });
+  });
+
+  test("201: returns returns updated review object when new votes is a negative number", () => {
+    const reqBody = { inc_votes: -2 };
+    return request(app)
+      .patch("/api/reviews/3")
+      .send(reqBody)
+      .expect(201)
+      .then((res) => {
+        expect(res.body.updatedReview.votes).toBe(3);
       });
   });
 
@@ -358,6 +389,30 @@ describe("PATCH /api/reviews/:review_id", () => {
         expect(res.body.msg).toBe(
           "Oh Dear, inc_votes needs to be a positive whole number!"
         );
+      });
+  });
+});
+
+describe("DELETE /api/review/:review_id", () => {
+  test("204 deletes the correct review and returns no content", () => {
+    return request(app).delete("/api/reviews/2").expect(204);
+  });
+
+  test("404: returns error message when called with valid but non-existent review id", () => {
+    return request(app)
+      .delete("/api/reviews/1234")
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, review_id does not exist!");
+      });
+  });
+
+  test("400: returns bad request error message when called with review id of invalid data", () => {
+    return request(app)
+      .delete("/api/reviews/nomnom")
+      .expect(400)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, bad request!");
       });
   });
 });
@@ -504,6 +559,106 @@ describe("DELETE /api/comments/:comment_id", () => {
       .expect(400)
       .then((res) => {
         expect(res.body.msg).toBe("Oh Dear, bad request!");
+      });
+  });
+});
+
+describe("Patch /api/comments/:comment_id", () => {
+  test("201: updates comment and returns updated comment when id is valid and new vote is a positive number", () => {
+    const reqBody = { inc_votes: 2 };
+
+    return request(app)
+      .patch("/api/comments/2")
+      .send(reqBody)
+      .expect(201)
+      .then((res) => {
+        expect(res.body.updatedComment.votes).toBe(15);
+
+        expect(res.body.updatedComment).toEqual(
+          expect.objectContaining({
+            comment_id: expect.any(Number),
+            author: expect.any(String),
+            review_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            body: expect.any(String),
+          })
+        );
+      });
+  });
+
+  test("201: updates comment and returns updated comment when id is valid and new vote is a negative number", () => {
+    const reqBody = { inc_votes: -2 };
+
+    return request(app)
+      .patch("/api/comments/1")
+      .send(reqBody)
+      .expect(201)
+      .then((res) => {
+        expect(res.body.updatedComment.votes).toBe(14);
+
+        expect(res.body.updatedComment).toEqual(
+          expect.objectContaining({
+            comment_id: expect.any(Number),
+            author: expect.any(String),
+            review_id: expect.any(Number),
+            votes: expect.any(Number),
+            created_at: expect.any(String),
+            body: expect.any(String),
+          })
+        );
+      });
+  });
+
+  test("404: returns error message when called with valid but non-existent comment id", () => {
+    const reqBody = { inc_votes: 2 };
+
+    return request(app)
+      .patch("/api/comments/122")
+      .send(reqBody)
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toEqual("Oh Dear, comment id does not exist!");
+      });
+  });
+
+  test("400: returns error message when called comment id of wrong data type", () => {
+    const reqBody = { inc_votes: 2 };
+
+    return request(app)
+      .patch("/api/comments/banana")
+      .send(reqBody)
+      .expect(400)
+      .then((res) => {
+        expect(res.body.msg).toEqual("Oh Dear, bad request!");
+      });
+  });
+
+  test("422: returns error message when called with a request body that contains incorrect data type", () => {
+    const reqBody = { inc_votes: "banana" };
+
+    return request(app)
+      .patch("/api/comments/banana")
+      .send(reqBody)
+      .expect(422)
+      .then((res) => {
+        expect(res.body.msg).toEqual(
+          "Oh Dear, inc_votes needs to be a positive whole number!"
+        );
+      });
+  });
+
+  test("422: returns error message when called with a request body that contains a number which is a float number", () => {
+    const reqBody = { inc_votes: "2.5" };
+
+    return request(app)
+      .patch("/api/comments/1")
+      .send(reqBody)
+      .expect(422)
+      .then((res) => {
+        expect(res.body.msg).toBe(
+          "Oh Dear, inc_votes needs to be a positive whole number!"
+        );
       });
   });
 });

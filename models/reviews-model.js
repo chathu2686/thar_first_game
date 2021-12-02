@@ -122,3 +122,25 @@ exports.editReviewById = (review_id, newVotes) => {
       }
     });
 };
+
+exports.removeReviewById = (id) => {
+  return db
+    .query(
+      `
+  DELETE FROM reviewData
+  WHERE review_id = $1
+  RETURNING *
+  ;`,
+      [id]
+    )
+    .then(({ rows }) => {
+      if (!rows.length) {
+        return Promise.reject({
+          status: 404,
+          msg: "Oh Dear, review_id does not exist!",
+        });
+      } else {
+        return rows[0];
+      }
+    });
+};

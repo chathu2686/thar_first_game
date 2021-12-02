@@ -1,4 +1,5 @@
 const {
+  editCommentById,
   fetchCommentsByReviewId,
   addCommentsByReviewId,
   removeCommentById,
@@ -33,11 +34,21 @@ exports.postCommentsByReviewId = (req, res, next) => {
 };
 
 exports.deleteCommentById = (req, res, next) => {
-  const commentId = req.params.id;
+  const commentId = req.params.comment_id;
 
   removeCommentById(commentId)
     .then(() => {
       res.status(204).send();
+    })
+    .catch(next);
+};
+
+exports.patchCommentById = (req, res, next) => {
+  const commentId = req.params.comment_id;
+  const newVotes = req.body.inc_votes;
+  Promise.all([editCommentById(commentId, newVotes), notNumber(newVotes)])
+    .then((result) => {
+      res.status(201).send({ updatedComment: result[0] });
     })
     .catch(next);
 };

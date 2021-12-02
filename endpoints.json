@@ -47,7 +47,7 @@
     }
   },
   "GET /api/reviews/:review_id": {
-    "description": "serves an object of the queried review",
+    "description": "serves an object containing the queried review",
     "queries": [""],
     "exampleResponse": {
       "review": {
@@ -65,7 +65,7 @@
     }
   },
   "GET /api/users/:username": {
-    "description": "serves a user object for the queried username",
+    "description": "serves an object containing the queried user",
     "queries": [""],
     "exampleResponse": {
       "users": {
@@ -76,10 +76,10 @@
     }
   },
   "Patch /api/reviews/:review_id": {
-    "description": "serves an object of the queried and updated review",
+    "description": "updates the reviews and returns it as an object",
     "queries": [],
     "exampleResponse": {
-      "review": {
+      "updatedReview": {
         "title": "One Night Ultimate Werewolf",
         "review_id": 1,
         "designer": "Akihisa Okui",
@@ -94,7 +94,7 @@
     }
   },
   "GET /api/reviews/:review_id/comments": {
-    "description": "serves an array of comments objects of the queried review",
+    "description": "serves an array of comments objects for the review",
     "queries": [],
     "exampleResponse": {
       "comments": [
@@ -110,7 +110,7 @@
     }
   },
   "POST /api/reviews/:review_id/comments": {
-    "description": "serves posted comment object for the queried review",
+    "description": "posts a comment for the review and returns the comment as an object",
     "queries": [],
     "exampleResponse": {
       "comment": [
@@ -126,7 +126,40 @@
     }
   },
   "DELETE /api/comments/:comment_id": {
-    "description": "deletes the queried comment and returns 204 status with no content",
+    "description": "deletes the comment and returns 204 status with no content",
+    "queries": [],
+    "exampleResponse": {}
+  },
+  "PATCH /api/comments/:comment_id": {
+    "description": "updates and returns the comment",
+    "queries": [],
+    "exampleResponse": {
+      "updatedComment": [
+        {
+          "comment_id": 3,
+          "author": "happyamy2016",
+          "review_id": 2,
+          "votes": 1,
+          "created_at": 1610964101251,
+          "body": "Fiddly fun for all the family"
+        }
+      ]
+    }
+  },
+  "POST /api/categories": {
+    "description": "creates new category and returns it as an object",
+    "queries": [],
+    "exampleResponse": {
+      "category": [
+        {
+          "description": "Players attempt to uncover each other's hidden role",
+          "slug": "Social deduction"
+        }
+      ]
+    }
+  },
+  "DELETE /api/reviews/:review_id": {
+    "description": "deletes the review and returns 204 status with no content",
     "queries": [],
     "exampleResponse": {}
   }

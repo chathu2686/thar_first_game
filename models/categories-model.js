@@ -5,3 +5,20 @@ exports.fetchCategories = () => {
     return response.rows;
   });
 };
+
+exports.addCategory = (newCategory) => {
+  return db
+    .query(
+      `
+    INSERT INTO categoryData
+    (slug, description)
+    VALUES
+    ($1, $2)
+    returning *
+  ;`,
+      [newCategory.slug, newCategory.description]
+    )
+    .then(({ rows }) => {
+      return rows[0];
+    });
+};
