@@ -12,7 +12,9 @@ describe.only("GET /api", () => {
     return request(app)
       .get("/api")
       .expect(200)
-      .then((res) => {});
+      .then((res) => {
+        console.log(res.body);
+      });
   });
 });
 
