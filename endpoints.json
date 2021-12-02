@@ -21,14 +21,89 @@
       "reviews": [
         {
           "title": "One Night Ultimate Werewolf",
+          "review_id": 1,
           "designer": "Akihisa Okui",
           "owner": "happyamy2016",
           "review_img_url": "https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
           "category": "hidden-roles",
           "created_at": 1610964101251,
-          "votes": 5
+          "votes": 5,
+          "comment_count": 0
         }
       ]
     }
+  },
+  "GET /api/reviews/:review_id": {
+    "description": "serves an object of the queried review",
+    "queries": [""],
+    "exampleResponse": {
+      "reviews": {
+        "title": "One Night Ultimate Werewolf",
+        "review_id": 1,
+        "designer": "Akihisa Okui",
+        "owner": "happyamy2016",
+        "review_img_url": "https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+        "category": "hidden-roles",
+        "created_at": 1610964101251,
+        "votes": 5,
+        "comment_count": 0,
+        "review_body": "Fiddly fun for all the family"
+      }
+    }
+  },
+  "Patch /api/reviews/:review_id": {
+    "description": "serves an object of the queried and updated review",
+    "queries": [],
+    "exampleResponse": {
+      "reviews": {
+        "title": "One Night Ultimate Werewolf",
+        "review_id": 1,
+        "designer": "Akihisa Okui",
+        "owner": "happyamy2016",
+        "review_img_url": "https://images.pexels.com/photos/5350049/pexels-photo-5350049.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+        "category": "hidden-roles",
+        "created_at": 1610964101251,
+        "votes": 5,
+        "comment_count": 0,
+        "review_body": "Fiddly fun for all the family"
+      }
+    }
+  },
+  "GET /api/reviews/:review_id/comments": {
+    "description": "serves an array of comments objects of the queried review",
+    "queries": [],
+    "exampleResponse": {
+      "reviews": [
+        {
+          "comment_id": 3,
+          "author": "happyamy2016",
+          "review_id": 2,
+          "votes": 1,
+          "created_at": 1610964101251,
+          "body": "Fiddly fun for all the family"
+        }
+      ]
+    }
+  },
+  "POST /api/reviews/:review_id/comments": {
+    "description": "serves posted comment object for the queried review",
+    "queries": [],
+    "exampleResponse": {
+      "reviews": [
+        {
+          "comment_id": 3,
+          "author": "happyamy2016",
+          "review_id": 2,
+          "votes": 1,
+          "created_at": 1610964101251,
+          "body": "Fiddly fun for all the family"
+        }
+      ]
+    }
+  },
+  "DELETE /api/comments/:comment_id": {
+    "description": "deletes the queried comment and returns 204 status with no content",
+    "queries": [],
+    "exampleResponse": {}
   }
 }
