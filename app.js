@@ -10,7 +10,7 @@ const apiRouter = require("./routes/apiRouter");
 const app = express();
 app.use(express.json());
 
-app.route("/").get((req, res) => {
+app.use("/", (req, res) => {
   res.status(200).send("Welcome to Tharaka's game-data API!");
 });
 
