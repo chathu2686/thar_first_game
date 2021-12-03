@@ -16,9 +16,9 @@ app.get("/", (req, res) => {
 
 app.use("/api", apiRouter);
 
-// app.use(handle400Error);
-// app.use(handle404Error);
-// app.use(handleCustomError);
-// app.use(handle500Error);
+app.use(handle400Error);
+app.use(handle404Error);
+app.use(handleCustomError);
+app.use(handle500Error);
 
 module.exports = app;
