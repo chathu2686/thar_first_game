@@ -1,11 +1,16 @@
 const db = require("../db/connection");
 const format = require("pg-format");
+const {
+  isIntegerOverZero,
+  isOrderValid,
+  pagination,
+} = require("../utils/utils");
+const { isValidCategory } = require("./categories-model");
 
 exports.checkReviewIdExists = (id) => {
   return db
     .query(
-      `
-        SELECT * FROM reviewData
+      `SELECT * FROM reviewData
         WHERE review_id = $1
     ;`,
       [id]
@@ -20,17 +25,8 @@ exports.checkReviewIdExists = (id) => {
     });
 };
 
-exports.isReviewQueryValid = (queryType, value) => {
-  const categoryArr = [
-    "euro game",
-    "social deduction",
-    "dexterity",
-    "children's games",
-    "%",
-  ];
-  const orderArr = ["ASC", "DESC"];
-
-  const sortByColumnsArr = [
+const isSortByValid = (query) => {
+  const arr = [
     "created_at",
     "owner",
     "review_id",
@@ -39,42 +35,42 @@ exports.isReviewQueryValid = (queryType, value) => {
     "comment_count",
   ];
 
-  if (queryType === "category" && !categoryArr.includes(value)) {
+  if (!arr.includes(query)) {
     return Promise.reject({
-      status: 404,
-      msg: "Oh Dear, Invalid category!",
-    });
-  }
-
-  if (queryType === "order" && !orderArr.includes(value.toUpperCase())) {
-    return Promise.reject({
-      status: 404,
-      msg: "Oh Dear, Invalid order value!",
-    });
-  }
-
-  if (queryType === "sort_by" && !sortByColumnsArr.includes(value)) {
-    return Promise.reject({
-      status: 404,
-      msg: "Oh Dear, Invalid sort_by value!",
+      status: 400,
+      msg: `Oh Dear, Invalid sort_by value!`,
     });
   }
 };
 
-exports.fetchReviews = (sortBy = "created_at", order = "DESC", category) => {
-  let queryStr = `
-   SELECT reviewData.*, (SELECT COUNT(*)::INT FROM commentData WHERE commentData.review_id=reviewData.review_id) AS comment_count FROM reviewData
-  `;
+exports.fetchReviews = (category, sortBy, order, limit, page) => {
+  return Promise.all([
+    isValidCategory(category),
+    isSortByValid(sortBy),
+    isOrderValid(order),
+    isIntegerOverZero(limit),
+    isIntegerOverZero(page),
+  ])
+    .then(() => {
+      // SQLinjection has been blocked through the above functions inside promise.all
 
-  if (category !== "%") {
-    queryStr += ` WHERE category LIKE '${category}'`;
-  }
+      return db.query(
+        `SELECT 
+        reviewData.review_id, title, reviewData.designer, reviewData.owner,reviewData.review_img_url, reviewData.category, reviewData.created_at,reviewData.votes, COUNT(commentData.review_id)::INT AS comment_count
+        FROM reviewData
+        LEFT JOIN commentData ON commentData.review_id = reviewData.review_id
+        where reviewData.category LIKE $1
+        GROUP BY reviewData.review_id
+        ORDER BY ${sortBy} ${order.toUpperCase()}
+        ;`,
+        [category.replaceAll("'", "''")]
+      );
+    })
+    .then(({ rows }) => {
+      const result = pagination(rows, Number(limit), Number(page));
 
-  queryStr += `ORDER BY ${sortBy} ${order.toUpperCase()}`;
-
-  return db.query(queryStr).then(({ rows }) => {
-    return rows;
-  });
+      return { reviews: result, total_count: rows.length };
+    });
 };
 
 exports.fetchReviewById = (review_id) => {

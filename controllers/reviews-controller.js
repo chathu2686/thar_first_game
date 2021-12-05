@@ -1,27 +1,27 @@
 const { request } = require("express");
+
 const {
-  isReviewQueryValid,
+  isSortByValid,
   fetchReviews,
   fetchReviewById,
   editReviewById,
   removeReviewById,
 } = require("../models/reviews-model");
 
-const { notNumber } = require("../utils/utils");
+const { isValidCategory } = require("../models/categories-model");
+
+const { isIntegerOverZero, isOrderValid } = require("../utils/utils");
 
 exports.getReviews = (req, res, next) => {
   const reqSortBy = req.query.sort_by || "created_at";
   const reqOrder = req.query.order || "DESC";
   const reqCategory = req.query.category || "%";
+  const reqLimit = req.query.limit || 10;
+  const reqPage = req.query.p || 1;
 
-  Promise.all([
-    fetchReviews(reqSortBy, reqOrder, reqCategory),
-    isReviewQueryValid("category", reqCategory),
-    isReviewQueryValid("order", reqOrder),
-    isReviewQueryValid("sort_by", reqSortBy),
-  ])
+  fetchReviews(reqCategory, reqSortBy, reqOrder, reqLimit, reqPage)
     .then((result) => {
-      res.status(200).send({ reviews: result[0] });
+      res.status(200).send(result);
     })
     .catch(next);
 };
@@ -37,10 +37,10 @@ exports.getReviewById = (req, res, next) => {
 
 exports.patchReviewById = (req, res, next) => {
   const reviewId = req.params.review_id;
-  const newVotes = req.body.inc_votes;
-  Promise.all([editReviewById(reviewId, newVotes), notNumber(newVotes)])
+  const newVotes = req.body.inc_votes || 0;
+  editReviewById(reviewId, newVotes)
     .then((result) => {
-      res.status(201).send({ updatedReview: result[0] });
+      res.status(200).send({ updatedReview: result });
     })
     .catch(next);
 };
@@ -53,3 +53,7 @@ exports.deleteReviewById = (req, res, next) => {
     })
     .catch(next);
 };
+
+// `SELECT reviewData.*, (SELECT COUNT(*)::INT FROM commentData WHERE commentData.review_id=reviewData.review_id) AS comment_count FROM reviewData WHERE category LIKE '${category}' ORDER BY ${sortBy} ${order.toUpperCase()} LIMIT ${limit} OFFSET ${
+//   (page - 1) * limit
+// }`;

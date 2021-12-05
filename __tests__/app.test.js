@@ -38,7 +38,7 @@ describe("GET /api/categories", () => {
 });
 
 describe("POST /api/categories", () => {
-  test("201: returns category object containing newlyu added category", () => {
+  test("201: creates and returns new category object", () => {
     const reqBody = {
       slug: "puzzles",
       description: "jigsaws etc",
@@ -53,6 +53,39 @@ describe("POST /api/categories", () => {
           slug: "puzzles",
           description: "jigsaws etc",
         });
+      });
+  });
+
+  test("201: creates and returns new category object while ignoring unnecessary properties from request body", () => {
+    const reqBody = {
+      slug: "puzzles",
+      description: "jigsaws etc",
+      fruit: `bananas`,
+    };
+
+    return request(app)
+      .post("/api/categories")
+      .send(reqBody)
+      .expect(201)
+      .then((res) => {
+        expect(res.body.newCategory).toEqual({
+          slug: "puzzles",
+          description: "jigsaws etc",
+        });
+      });
+  });
+
+  test("400: returns error message if slug or description is missing", () => {
+    const reqBody = {
+      slug: "puzzles",
+    };
+
+    return request(app)
+      .post("/api/categories")
+      .send(reqBody)
+      .expect(400)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, category information incomplete!");
       });
   });
 });
@@ -79,17 +112,13 @@ describe("GET /api/users", () => {
 });
 
 describe("GET /api/reviews", () => {
-  test("200: returns an array of review objects ordered by date(created_at) Descending by default", () => {
+  test("returns an array of review objects and total count key", () => {
     return request(app)
       .get("/api/reviews")
       .expect(200)
       .then((res) => {
-        expect(res.body.reviews).toBeSortedBy("created_at", {
-          descending: true,
-        });
-
-        expect(res.body.reviews).toHaveLength(13);
-
+        expect(res.body.reviews).toHaveLength(10);
+        expect(res.body.total_count).toBe(13);
         res.body.reviews.forEach((review) => {
           expect(review).toEqual(
             expect.objectContaining({
@@ -107,144 +136,110 @@ describe("GET /api/reviews", () => {
       });
   });
 
-  test("200: returns an array of review objects with the valid category, descending by default, when called with a category query", () => {
+  test("200: returns an array of sorted review objects", () => {
     return request(app)
-      .get("/api/reviews?category=social deduction")
+      .get("/api/reviews?sort_by=review_id")
       .expect(200)
       .then((res) => {
-        expect(res.body.reviews).toBeSortedBy("created_at", {
+        expect(res.body.reviews).toBeSortedBy("review_id", {
           descending: true,
         });
-
-        expect(res.body.reviews).toHaveLength(11);
-
-        res.body.reviews.forEach((review) => {
-          expect(review).toEqual(
-            expect.objectContaining({
-              owner: expect.any(String),
-              title: expect.any(String),
-              review_id: expect.any(Number),
-              category: "social deduction",
-              review_img_url: expect.any(String),
-              created_at: expect.any(String),
-              votes: expect.any(Number),
-              comment_count: expect.any(Number),
-            })
-          );
-        });
       });
   });
 
-  test("404: returns error message when called with an invalid category query", () => {
+  test("400: returns error message if sort_by input is invalid", () => {
     return request(app)
-      .get("/api/reviews?category=bananas")
-      .expect(404)
-      .then((res) => {
-        expect(res.body.msg).toBe("Oh Dear, Invalid category!");
-      });
-  });
-
-  test("200: returns an array of review objects ordered by the queried sort_by column, descending by default, when called with a valid sort_by column", () => {
-    return request(app)
-      .get("/api/reviews?sort_by=votes")
-      .expect(200)
-      .then((res) => {
-        expect(res.body.reviews).toBeSortedBy("votes", {
-          descending: true,
-        });
-
-        expect(res.body.reviews).toHaveLength(13);
-
-        res.body.reviews.forEach((review) => {
-          expect(review).toEqual(
-            expect.objectContaining({
-              owner: expect.any(String),
-              title: expect.any(String),
-              review_id: expect.any(Number),
-              category: expect.any(String),
-              review_img_url: expect.any(String),
-              created_at: expect.any(String),
-              votes: expect.any(Number),
-              comment_count: expect.any(Number),
-            })
-          );
-        });
-      });
-  });
-
-  test("404: returns error message when called with invalid sort_by column query", () => {
-    return request(app)
-      .get("/api/reviews?sort_by=hello")
-      .expect(404)
+      .get("/api/reviews?sort_by=not_a_column")
+      .expect(400)
       .then((res) => {
         expect(res.body.msg).toBe("Oh Dear, Invalid sort_by value!");
       });
   });
 
-  test("200: returns an array of review objects ordered by date(created_at) in ascending order when called with an order query(regardless of case)", () => {
+  test("200: returns an arr of sorted review objects by queried order value", () => {
     return request(app)
-      .get("/api/reviews?order=AsC")
+      .get("/api/reviews?sort_by=review_id&order=asc")
       .expect(200)
       .then((res) => {
-        expect(res.body.reviews).toBeSortedBy("created_at", {
+        expect(res.body.reviews).toBeSortedBy("review_id", {
           descending: false,
-        });
-
-        expect(res.body.reviews).toHaveLength(13);
-
-        res.body.reviews.forEach((review) => {
-          expect(review).toEqual(
-            expect.objectContaining({
-              owner: expect.any(String),
-              title: expect.any(String),
-              review_id: expect.any(Number),
-              category: expect.any(String),
-              review_img_url: expect.any(String),
-              created_at: expect.any(String),
-              votes: expect.any(Number),
-              comment_count: expect.any(Number),
-            })
-          );
         });
       });
   });
 
-  test("404: returns error message when called with an invalid order query", () => {
+  test("400: returns error message when order input is invalid", () => {
     return request(app)
-      .get("/api/reviews?order=banana")
-      .expect(404)
+      .get("/api/reviews?sort_by=review_id&order=banana")
+      .expect(400)
       .then((res) => {
         expect(res.body.msg).toBe("Oh Dear, Invalid order value!");
       });
   });
 
-  test("200: returns an array of review objects of the queried category ordered by queried column and in the queried order ", () => {
+  test("200: returns an array of review objects belonging to the queried category", () => {
     return request(app)
-      .get(
-        "/api/reviews?sort_by=votes&&order=dEsC&&category=social%20deduction"
-      )
+      .get("/api/reviews?category=social deduction")
       .expect(200)
       .then((res) => {
-        expect(res.body.reviews).toBeSortedBy("votes", {
-          descending: true,
-        });
-
-        expect(res.body.reviews).toHaveLength(11);
-
         res.body.reviews.forEach((review) => {
-          expect(review).toEqual(
-            expect.objectContaining({
-              owner: expect.any(String),
-              title: expect.any(String),
-              review_id: expect.any(Number),
-              category: expect.any(String),
-              review_img_url: expect.any(String),
-              created_at: expect.any(String),
-              votes: expect.any(Number),
-              comment_count: expect.any(Number),
-            })
-          );
+          expect(review.category).toBe("social deduction");
         });
+      });
+  });
+
+  test("200: returns an empty array when there are no reviews present for the queried category", () => {
+    return request(app)
+      .get("/api/reviews?category=children's games")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toHaveLength(0);
+      });
+  });
+
+  test("404: returns error message when called with a non-existent category query", () => {
+    return request(app)
+      .get("/api/reviews?category=bananas")
+      .expect(404)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, category does not exist!");
+      });
+  });
+
+  test("200: returns returns an array of review objects limited to queried limit amount ", () => {
+    return request(app)
+      .get("/api/reviews?limit=5")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toHaveLength(5);
+      });
+  });
+
+  test("400: returns error message when limit query is invalid", () => {
+    return request(app)
+      .get("/api/reviews?limit=banana")
+      .expect(400)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, bad request!");
+      });
+  });
+
+  test("200: returns an array containing the queried page of reviews", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=review_id&order=asc&p=2")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toHaveLength(3);
+        expect(res.body.reviews[0].review_id).toBe(11);
+        expect(res.body.reviews[2].review_id).toBe(13);
+      });
+  });
+
+  test("400: returns error message when page value is incorrect data type", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=review_id&order=asc&p=banana")
+      .expect(400)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, bad request!");
       });
   });
 });
@@ -318,25 +313,47 @@ describe("GET /api/reviews/:review_id", () => {
 });
 
 describe("PATCH /api/reviews/:review_id", () => {
-  test("201: returns returns updated review object when new votes is a positive number", () => {
+  test("200: returns returns updated review object when new votes is a positive number", () => {
     const reqBody = { inc_votes: 2 };
     return request(app)
       .patch("/api/reviews/2")
       .send(reqBody)
-      .expect(201)
+      .expect(200)
       .then((res) => {
-        expect(res.body.updatedReview.votes).toBe(7);
+        expect(res.body.updatedReview).toEqual({
+          review_id: 2,
+          title: "Jenga",
+          designer: "Leslie Scott",
+          owner: "philippaclaire9",
+          review_img_url:
+            "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          review_body: "Fiddly fun for all the family",
+          category: "dexterity",
+          created_at: "2021-01-18T10:01:41.251Z",
+          votes: 7,
+        });
       });
   });
 
-  test("201: returns returns updated review object when new votes is a negative number", () => {
+  test("200: returns returns updated review object when new votes is a negative number", () => {
     const reqBody = { inc_votes: -2 };
     return request(app)
-      .patch("/api/reviews/3")
+      .patch("/api/reviews/2")
       .send(reqBody)
-      .expect(201)
+      .expect(200)
       .then((res) => {
-        expect(res.body.updatedReview.votes).toBe(3);
+        expect(res.body.updatedReview).toEqual({
+          review_id: 2,
+          title: "Jenga",
+          designer: "Leslie Scott",
+          owner: "philippaclaire9",
+          review_img_url:
+            "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          review_body: "Fiddly fun for all the family",
+          category: "dexterity",
+          created_at: "2021-01-18T10:01:41.251Z",
+          votes: 3,
+        });
       });
   });
 
@@ -364,31 +381,49 @@ describe("PATCH /api/reviews/:review_id", () => {
       });
   });
 
-  test("422: returns error message when called with a request body that contains incorrect data type", () => {
-    const reqBody = { inc_votes: "banana" };
+  test("200: returns non-updated review object when inc-votes key is missing from request body", () => {
+    const reqBody = {};
+    return request(app)
+      .patch("/api/reviews/2")
+      .send(reqBody)
+      .expect(200)
+      .then((res) => {
+        expect(res.body.updatedReview).toEqual({
+          review_id: 2,
+          title: "Jenga",
+          designer: "Leslie Scott",
+          owner: "philippaclaire9",
+          review_img_url:
+            "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+          review_body: "Fiddly fun for all the family",
+          category: "dexterity",
+          created_at: "2021-01-18T10:01:41.251Z",
+          votes: 5,
+        });
+      });
+  });
+
+  test("400: returns error message when called with a request body that contains incorrect data type", () => {
+    const reqBody = { inc_votes: 2.5 };
 
     return request(app)
       .patch("/api/reviews/1")
       .send(reqBody)
-      .expect(422)
+      .expect(400)
       .then((res) => {
-        expect(res.body.msg).toBe(
-          "Oh Dear, inc_votes needs to be a positive whole number!"
-        );
+        expect(res.body.msg).toBe("Oh Dear, bad request!");
       });
   });
 
-  test("422: returns error message when called with a request body that contains a number which is a float number", () => {
+  test("400: returns error message when called with a request body that contains a number which is a float number", () => {
     const reqBody = { inc_votes: "2.5" };
 
     return request(app)
       .patch("/api/reviews/1")
       .send(reqBody)
-      .expect(422)
+      .expect(400)
       .then((res) => {
-        expect(res.body.msg).toBe(
-          "Oh Dear, inc_votes needs to be a positive whole number!"
-        );
+        expect(res.body.msg).toBe("Oh Dear, bad request!");
       });
   });
 });
@@ -447,6 +482,30 @@ describe("GET /api/reviews/:review_id/comments", () => {
       });
   });
 
+  test("200: returns a limited array of comment object when called with limit query", () => {
+    return request(app)
+      .get("/api/reviews/3/comments?limit=2")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.comments).toHaveLength(2);
+      });
+  });
+
+  test("200: returns a limited array of comment objects when called with valid page number", () => {
+    return request(app)
+      .get("/api/reviews/3/comments?limit=2&p=2")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.comments[0]).toEqual({
+          comment_id: 6,
+          body: "Not sure about dogs, but my cat likes to get involved with board games, the boxes are their particular favourite",
+          votes: 10,
+          author: "philippaclaire9",
+          created_at: "2021-03-27T19:49:48.110Z",
+        });
+      });
+  });
+
   test("400: returns bad request error message when called with a review id of the wrong data type", () => {
     return request(app)
       .get("/api/reviews/banana/comments")
@@ -462,6 +521,24 @@ describe("GET /api/reviews/:review_id/comments", () => {
       .expect(404)
       .then((res) => {
         expect(res.body.msg).toBe("Oh Dear, review_id does not exist!");
+      });
+  });
+
+  test("400: returns bad request error message when called with an invalid limit", () => {
+    return request(app)
+      .get("/api/reviews/3/comments?limit=bananas")
+      .expect(400)
+      .then((result) => {
+        expect(result.body.msg).toBe("Oh Dear, bad request!");
+      });
+  });
+
+  test("400: returns bad request error message when called with an invalid page number", () => {
+    return request(app)
+      .get("/api/reviews/3/comments?limit=2&p=mango")
+      .expect(400)
+      .then((result) => {
+        expect(result.body.msg).toBe("Oh Dear, bad request!");
       });
   });
 });
@@ -523,6 +600,44 @@ describe("POST /api/reviews/:review_id/comments", () => {
       });
   });
 
+  test("201: posts and returns new comment object while ignoring unnecessary properties from request body", () => {
+    const reqBody = {
+      username: "bainesface",
+      body: "well done! nice comment :D",
+      fruit: "bananas",
+    };
+
+    return request(app)
+      .post("/api/reviews/4/comments")
+      .send(reqBody)
+      .expect(201)
+      .then((res) => {
+        expect(res.body.comment).toEqual(
+          expect.objectContaining({
+            author: "bainesface",
+            body: "well done! nice comment :D",
+            review_id: 4,
+            votes: 0,
+            comment_id: 7,
+            created_at: expect.any(String),
+          })
+        );
+      });
+  });
+
+  test("400: returns error message if username or body is missing from comment", () => {
+    const reqBody = {
+      username: "bainesface",
+    };
+    return request(app)
+      .post("/api/reviews/3/comments")
+      .send(reqBody)
+      .expect(400)
+      .then((res) => {
+        expect(res.body.msg).toBe("Oh Dear, comment is incomeplete!");
+      });
+  });
+
   test("400: returns error message if request body has non-existent username", () => {
     const reqBody = {
       username: "helloo",
@@ -564,13 +679,13 @@ describe("DELETE /api/comments/:comment_id", () => {
 });
 
 describe("Patch /api/comments/:comment_id", () => {
-  test("201: updates comment and returns updated comment when id is valid and new vote is a positive number", () => {
+  test("200: updates comment and returns updated comment when id is valid and new vote is a positive number", () => {
     const reqBody = { inc_votes: 2 };
 
     return request(app)
       .patch("/api/comments/2")
       .send(reqBody)
-      .expect(201)
+      .expect(200)
       .then((res) => {
         expect(res.body.updatedComment.votes).toBe(15);
 
@@ -587,13 +702,13 @@ describe("Patch /api/comments/:comment_id", () => {
       });
   });
 
-  test("201: updates comment and returns updated comment when id is valid and new vote is a negative number", () => {
+  test("200: updates comment and returns updated comment when id is valid and new vote is a negative number", () => {
     const reqBody = { inc_votes: -2 };
 
     return request(app)
       .patch("/api/comments/1")
       .send(reqBody)
-      .expect(201)
+      .expect(200)
       .then((res) => {
         expect(res.body.updatedComment.votes).toBe(14);
 
@@ -634,31 +749,34 @@ describe("Patch /api/comments/:comment_id", () => {
       });
   });
 
-  test("422: returns error message when called with a request body that contains incorrect data type", () => {
+  test("400: returns error message when called with a request body that contains incorrect data type", () => {
     const reqBody = { inc_votes: "banana" };
 
     return request(app)
       .patch("/api/comments/banana")
       .send(reqBody)
-      .expect(422)
+      .expect(400)
       .then((res) => {
-        expect(res.body.msg).toEqual(
-          "Oh Dear, inc_votes needs to be a positive whole number!"
-        );
+        expect(res.body.msg).toEqual("Oh Dear, bad request!");
       });
   });
 
-  test("422: returns error message when called with a request body that contains a number which is a float number", () => {
-    const reqBody = { inc_votes: "2.5" };
+  test("200: returns comment object with votes remaining unchanged when inc_votes is missing from request body", () => {
+    const reqBody = {};
 
     return request(app)
       .patch("/api/comments/1")
       .send(reqBody)
-      .expect(422)
+      .expect(200)
       .then((res) => {
-        expect(res.body.msg).toBe(
-          "Oh Dear, inc_votes needs to be a positive whole number!"
-        );
+        expect(res.body.updatedComment).toEqual({
+          comment_id: 1,
+          body: "I loved this game too!",
+          votes: 16,
+          author: "bainesface",
+          review_id: 2,
+          created_at: "2017-11-22T12:43:33.389Z",
+        });
       });
   });
 });

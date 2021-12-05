@@ -1,10 +1,18 @@
 const db = require("../db/connection");
 const format = require("pg-format");
+const { checkReviewIdExists } = require("../models/reviews-model");
+const { checkUsernameExists } = require("./users-model");
+const { isIntegerOverZero, pagination } = require("../utils/utils");
 
-exports.fetchCommentsByReviewId = (id) => {
-  return db
-    .query(
-      `
+exports.fetchCommentsByReviewId = (id, limit, pageNumber) => {
+  return Promise.all([
+    checkReviewIdExists(id),
+    isIntegerOverZero(limit),
+    isIntegerOverZero(pageNumber),
+  ])
+    .then(() => {
+      return db.query(
+        `
         SELECT 
         commentData.comment_id, 
         commentData.votes, 
@@ -12,27 +20,37 @@ exports.fetchCommentsByReviewId = (id) => {
         commentData.author, 
         commentData.body 
         FROM commentData
-        WHERE commentData.review_id = $1    
+        WHERE commentData.review_id = $1 
     ;`,
-      [id]
-    )
-    .then((result) => {
-      return result.rows;
+        [id]
+      );
+    })
+    .then(({ rows }) => {
+      const result = pagination(rows, Number(limit), Number(pageNumber));
+      return result;
     });
 };
 
-exports.addCommentsByReviewId = (comment, reviewId) => {
-  return db
-    .query(
-      `
+exports.addCommentByReviewId = (comment, reviewId) => {
+  if (!comment.username || !comment.body) {
+    return Promise.reject({
+      status: 400,
+      msg: "Oh Dear, comment is incomeplete!",
+    });
+  }
+  return checkUsernameExists(comment.username)
+    .then(() => {
+      return db.query(
+        `
     INSERT INTO commentData
     (author, review_id, votes, body)
     VALUES
     ($1, $2, 0, $3)
     RETURNING *
   ;`,
-      [comment.username, reviewId, comment.body]
-    )
+        [comment.username, reviewId, comment.body]
+      );
+    })
     .then(({ rows }) => {
       return rows[0];
     });

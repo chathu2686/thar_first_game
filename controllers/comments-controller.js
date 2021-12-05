@@ -1,34 +1,26 @@
 const {
   editCommentById,
   fetchCommentsByReviewId,
-  addCommentsByReviewId,
+  addCommentByReviewId,
   removeCommentById,
 } = require("../models/comments-model");
-const { checkReviewIdExists } = require("../models/reviews-model");
-const { checkUsernameExists } = require("../models/users-model");
-const { notNumber } = require("../utils/utils");
 
 exports.getCommentsByReviewId = (req, res, next) => {
   const reviewId = req.params.review_id;
-  Promise.all([
-    fetchCommentsByReviewId(reviewId),
-    checkReviewIdExists(reviewId),
-  ])
-    .then((result) => {
-      res.status(200).send({ comments: result[0] });
+  const limit = req.query.limit || 10;
+  const pageNumber = req.query.p || 1;
+  fetchCommentsByReviewId(reviewId, limit, pageNumber)
+    .then((comments) => {
+      res.status(200).send({ comments });
     })
     .catch(next);
 };
 
 exports.postCommentsByReviewId = (req, res, next) => {
   const reviewId = req.params.review_id;
-  const username = req.body.username;
-  Promise.all([
-    addCommentsByReviewId(req.body, reviewId),
-    checkUsernameExists(username),
-  ])
-    .then((result) => {
-      res.status(201).send({ comment: result[0] });
+  addCommentByReviewId(req.body, reviewId)
+    .then((comment) => {
+      res.status(201).send({ comment });
     })
     .catch(next);
 };
@@ -45,10 +37,10 @@ exports.deleteCommentById = (req, res, next) => {
 
 exports.patchCommentById = (req, res, next) => {
   const commentId = req.params.comment_id;
-  const newVotes = req.body.inc_votes;
-  Promise.all([editCommentById(commentId, newVotes), notNumber(newVotes)])
-    .then((result) => {
-      res.status(201).send({ updatedComment: result[0] });
+  const newVotes = req.body.inc_votes || 0;
+  editCommentById(commentId, newVotes)
+    .then((updatedComment) => {
+      res.status(200).send({ updatedComment });
     })
     .catch(next);
 };
