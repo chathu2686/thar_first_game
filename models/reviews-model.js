@@ -44,15 +44,15 @@ const isSortByValid = (query) => {
 };
 
 exports.fetchReviews = (category, sortBy, order, limit, page) => {
-  return Promise.all([
-    isValidCategory(category),
-    isSortByValid(sortBy),
-    isOrderValid(order),
-    isIntegerOverZero(limit),
-    isIntegerOverZero(page),
-  ])
-    .then(() => {
-      // SQLinjection has been blocked through the above functions inside promise.all
+  // return Promise.all([
+  //   isValidCategory(category),
+  //   isSortByValid(sortBy),
+  //   isOrderValid(order),
+  //   isIntegerOverZero(limit),
+  //   isIntegerOverZero(page),
+  // ])
+  //   .then(() => {
+  //     // SQLinjection has been blocked through the above functions inside promise.all
       const editedCategory = category.replaceAll("'", "''");
 
       return db.query(
@@ -66,7 +66,7 @@ exports.fetchReviews = (category, sortBy, order, limit, page) => {
         ;`,
         [editedCategory]
       );
-    })
+    // })
     .then(({ rows }) => {
       const result = pagination(rows, Number(limit), Number(page));
 
