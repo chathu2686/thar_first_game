@@ -23,7 +23,10 @@ exports.getReviews = (req, res, next) => {
     .then((result) => {
       res.status(200).send(result);
     })
-    .catch(next);
+    .catch((err) => {
+      console.log(err);
+      next(err);
+    });
 };
 
 exports.getReviewById = (req, res, next) => {
