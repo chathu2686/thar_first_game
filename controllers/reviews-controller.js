@@ -20,8 +20,8 @@ exports.getReviews = (req, res, next) => {
   const reqPage = req.query.p || 1;
 
   fetchReviews(reqCategory, reqSortBy, reqOrder, reqLimit, reqPage)
-    .then((result) => {
-      res.status(200).send(result);
+    .then((reviews) => {
+      res.status(200).send({ reviews });
     })
     .catch((err) => {
       console.log(err);
