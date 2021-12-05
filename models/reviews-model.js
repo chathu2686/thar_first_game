@@ -60,21 +60,15 @@ exports.fetchReviews = (category, sortBy, order, limit, page) => {
         reviewData.review_id, title, reviewData.designer, reviewData.owner,reviewData.review_img_url, reviewData.category, reviewData.created_at,reviewData.votes, COUNT(commentData.review_id)::INT AS comment_count
         FROM reviewData
         LEFT JOIN commentData ON commentData.review_id = reviewData.review_id
+        where reviewData.category LIKE $1
         GROUP BY reviewData.review_id
         ORDER BY ${sortBy} ${order}
-        ;`
+        ;`,
+        [editedCategory]
       );
     })
     .then(({ rows }) => {
-      let newRows;
-      if (category !== "%") {
-        newRows = rows.filter((review) => {
-          review.category === category;
-        });
-      } else {
-        newRows = rows;
-      }
-      const result = pagination(newRows, Number(limit), Number(page));
+      const result = pagination(rows, Number(limit), Number(page));
 
       return { reviews: result, total_count: rows.length };
     });
