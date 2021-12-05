@@ -31,11 +31,15 @@ exports.getReviews = (req, res, next) => {
 
 exports.getReviewById = (req, res, next) => {
   const reviewId = req.params.review_id;
+  console.log(reviewId);
   fetchReviewById(reviewId)
     .then((result) => {
       res.status(200).send({ review: result });
     })
-    .catch(next);
+    .catch((err) => {
+      console.log(err);
+      next(err);
+    });
 };
 
 exports.patchReviewById = (req, res, next) => {

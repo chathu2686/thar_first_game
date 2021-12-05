@@ -60,7 +60,7 @@ exports.fetchReviews = (category, sortBy, order, limit, page) => {
         reviewData.review_id, title, reviewData.designer, reviewData.owner,reviewData.review_img_url, reviewData.category, reviewData.created_at,reviewData.votes, COUNT(commentData.review_id)::INT AS comment_count
         FROM reviewData
         LEFT JOIN commentData ON commentData.review_id = reviewData.review_id
-        where reviewData.category LIKE $1
+        WHERE reviewData.category LIKE $1
         GROUP BY reviewData.review_id
         ORDER BY ${sortBy} ${order}
         ;`,
@@ -77,11 +77,12 @@ exports.fetchReviews = (category, sortBy, order, limit, page) => {
 exports.fetchReviewById = (review_id) => {
   return db
     .query(
-      `
-    SELECT reviewData.*, COUNT(commentData.*)::INT AS comment_count  FROM commentData 
-    JOIN reviewData on commentData.review_id = reviewData.review_id
-    WHERE reviewData.review_id = $1
-    GROUP BY reviewData.review_id
+      `SELECT 
+        reviewData.review_id, title, reviewData.designer, reviewData.owner,reviewData.review_img_url, reviewData.category, reviewData.created_at,reviewData.votes, reviewData.review_body, COUNT(commentData.review_id)::INT AS comment_count
+        FROM reviewData
+        LEFT JOIN commentData ON commentData.review_id = reviewData.review_id
+        WHERE reviewData.review_id = $1
+        GROUP BY reviewData.review_id
   ;`,
       [review_id]
     )
