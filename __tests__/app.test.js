@@ -117,7 +117,7 @@ describe("GET /api/reviews", () => {
       .get("/api/reviews?category")
       .expect(200)
       .then((res) => {
-        expect(res.body.reviews[0].total_count).toBe(13);
+        expect(res.body.total_count).toBe(13);
 
         res.body.reviews.forEach((review) => {
           expect(review).toEqual(
