@@ -61,7 +61,7 @@ exports.fetchReviews = (category, sortBy, order, limit, page) => {
         LEFT JOIN commentData ON commentData.review_id = reviewData.review_id
         where reviewData.category LIKE $1
         GROUP BY reviewData.review_id
-        ORDER BY ${sortBy} ${order.toUpperCase()}
+        ORDER BY ${sortBy} ${order}
         ;`,
         [category.replaceAll("'", "''")]
       );

@@ -112,12 +112,11 @@ describe("GET /api/users", () => {
 });
 
 describe("GET /api/reviews", () => {
-  test.only("returns an array of review objects and total count key", () => {
+  test("returns an array of review objects and total count key", () => {
     return request(app)
       .get("/api/reviews")
       .expect(200)
       .then((res) => {
-        console.log(res.body.reviews);
         expect(res.body.reviews).toHaveLength(10);
         expect(res.body.total_count).toBe(13);
         res.body.reviews.forEach((review) => {
