@@ -53,9 +53,11 @@ exports.fetchReviews = (category, sortBy, order, limit, page) => {
   // ])
   //   .then(() => {
   //     // SQLinjection has been blocked through the above functions inside promise.all
-      const editedCategory = category.replaceAll("'", "''");
+  const editedCategory = category.replaceAll("'", "''");
 
-      return db.query(
+  return (
+    db
+      .query(
         `SELECT 
         reviewData.review_id, title, reviewData.designer, reviewData.owner,reviewData.review_img_url, reviewData.category, reviewData.created_at,reviewData.votes, COUNT(commentData.review_id)::INT AS comment_count
         FROM reviewData
@@ -65,13 +67,14 @@ exports.fetchReviews = (category, sortBy, order, limit, page) => {
         ORDER BY ${sortBy} ${order}
         ;`,
         [editedCategory]
-      );
-    // })
-    .then(({ rows }) => {
-      const result = pagination(rows, Number(limit), Number(page));
+      )
+      // })
+      .then(({ rows }) => {
+        const result = pagination(rows, Number(limit), Number(page));
 
-      return { reviews: result, total_count: rows.length };
-    });
+        return { reviews: result, total_count: rows.length };
+      })
+  );
 };
 
 exports.fetchReviewById = (review_id) => {
