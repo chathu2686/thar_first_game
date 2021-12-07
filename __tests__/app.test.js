@@ -114,7 +114,7 @@ describe("GET /api/users", () => {
 describe("GET /api/reviews", () => {
   test("returns an array of review objects and total count key", () => {
     return request(app)
-      .get("/api/reviews?category")
+      .get("/api/reviews")
       .expect(200)
       .then((res) => {
         expect(res.body.total_count).toBe(13);
