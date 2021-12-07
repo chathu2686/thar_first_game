@@ -53,7 +53,7 @@ exports.fetchReviews = (category, sortBy, order, limit, page) => {
   ])
     .then(() => {
       // SQLinjection has been blocked through the above functions inside promise.all
-      const editedCategory = category.replaceAll("'", "''");
+      const editedCategory = category.split("'").join("''");
 
       return db.query(
         `SELECT 
