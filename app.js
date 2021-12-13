@@ -11,7 +11,9 @@ const app = express();
 app.use(express.json());
 
 app.get("/", (req, res) => {
-  res.status(200).send("Welcome to Tharaka's game-data API!");
+  res
+    .status(200)
+    .send("Welcome to Tharaka's game-data API deployed through CI!");
 });
 
 app.use("/api", apiRouter);
