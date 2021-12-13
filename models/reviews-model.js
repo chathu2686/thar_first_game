@@ -27,10 +27,12 @@ exports.checkReviewIdExists = (id) => {
 
 const isSortByValid = (query) => {
   const arr = [
-    "created_at",
     "owner",
+    "title",
     "review_id",
     "category",
+    "review_img_url",
+    "created_at",
     "votes",
     "comment_count",
   ];

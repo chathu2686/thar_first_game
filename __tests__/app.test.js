@@ -136,12 +136,90 @@ describe("GET /api/reviews", () => {
       });
   });
 
-  test("200: returns an array of sorted review objects", () => {
+  test("200: returns an array of sorted review objects when sort by value is owner", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=owner")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("owner", {
+          descending: true,
+        });
+      });
+  });
+
+  test("200: returns an array of sorted review objects when sort by value is title", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=title")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("title", {
+          descending: true,
+        });
+      });
+  });
+
+  test("200: returns an array of sorted review objects when sort by value is review_id", () => {
     return request(app)
       .get("/api/reviews?sort_by=review_id")
       .expect(200)
       .then((res) => {
         expect(res.body.reviews).toBeSortedBy("review_id", {
+          descending: true,
+        });
+      });
+  });
+
+  test("200: returns an array of sorted review objects when sort by value is category", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=category")
+      .expect(200)
+      .then((res) => {
+        console.log(res.body.reviews);
+        expect(res.body.reviews).toBeSortedBy("category", {
+          descending: true,
+        });
+      });
+  });
+
+  test("200: returns an array of sorted review objects when sort by value is review_img_url", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=review_img_url")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("review_img_url", {
+          descending: true,
+        });
+      });
+  });
+
+  test("200: returns an array of sorted review objects when sort by value is created_at", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=created_at")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("created_at", {
+          descending: true,
+        });
+      });
+  });
+
+  test("200: returns an array of sorted review objects when sort by value is votes", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=votes")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("votes", {
+          descending: true,
+        });
+      });
+  });
+
+  test("200: returns an array of sorted review objects when sort by value is comment_count", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=comment_count")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("comment_count", {
           descending: true,
         });
       });
@@ -156,13 +234,24 @@ describe("GET /api/reviews", () => {
       });
   });
 
-  test("200: returns an arr of sorted review objects by queried order value", () => {
+  test("200: returns an arr of ascending review objects when order value is ascending", () => {
     return request(app)
       .get("/api/reviews?sort_by=review_id&order=asc")
       .expect(200)
       .then((res) => {
         expect(res.body.reviews).toBeSortedBy("review_id", {
           descending: false,
+        });
+      });
+  });
+
+  test("200: returns an arr of descending review objects when order value is descending", () => {
+    return request(app)
+      .get("/api/reviews?sort_by=review_id&order=desc")
+      .expect(200)
+      .then((res) => {
+        expect(res.body.reviews).toBeSortedBy("review_id", {
+          descending: true,
         });
       });
   });
