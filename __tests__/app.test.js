@@ -112,7 +112,7 @@ describe("GET /api/users", () => {
 });
 
 describe("GET /api/reviews", () => {
-  test("returns an array of review objects and total count key", () => {
+  test("200: returns an array of review objects and total count key", () => {
     return request(app)
       .get("/api/reviews")
       .expect(200)
