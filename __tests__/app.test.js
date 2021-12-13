@@ -174,7 +174,6 @@ describe("GET /api/reviews", () => {
       .get("/api/reviews?sort_by=category")
       .expect(200)
       .then((res) => {
-        console.log(res.body.reviews);
         expect(res.body.reviews).toBeSortedBy("category", {
           descending: true,
         });
