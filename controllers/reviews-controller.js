@@ -23,23 +23,17 @@ exports.getReviews = (req, res, next) => {
     .then((result) => {
       res.status(200).send(result);
     })
-    .catch((err) => {
-      console.log(err);
-      next(err);
-    });
+    .catch(next);
 };
 
 exports.getReviewById = (req, res, next) => {
   const reviewId = req.params.review_id;
-  console.log(reviewId);
+
   fetchReviewById(reviewId)
     .then((result) => {
       res.status(200).send({ review: result });
     })
-    .catch((err) => {
-      console.log(err);
-      next(err);
-    });
+    .catch(next);
 };
 
 exports.patchReviewById = (req, res, next) => {
